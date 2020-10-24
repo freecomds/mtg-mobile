@@ -20,6 +20,15 @@ define(['squire', 'ko', 'jquery', 'jquery/validate'], function (Squire, ko, $) {
             openModal: jasmine.createSpy(),
             closeModal: jasmine.createSpy()
         },
+        country = {
+            indexedOptions: {
+                'AD': {
+                    label: 'Andorra',
+                    labeltitle: 'Andorra',
+                    value: 'AD'
+                }
+            }
+        },
         mocks = {
             'Magento_Customer/js/model/customer': {
                 isLoggedIn: ko.observable()
@@ -28,7 +37,17 @@ define(['squire', 'ko', 'jquery', 'jquery/validate'], function (Squire, ko, $) {
             'Magento_Checkout/js/model/address-converter': jasmine.createSpy(),
             'Magento_Checkout/js/model/quote': {
                 isVirtual: jasmine.createSpy(),
-                shippingMethod: ko.observable()
+                shippingMethod: ko.observable(),
+
+                /**
+                 * Stub
+                 */
+                shippingAddress: function () {
+
+                    return {
+                        'countryId': 'AD'
+                    };
+                }
             },
             'Magento_Checkout/js/action/create-shipping-address': jasmine.createSpy().and.returnValue(
                 jasmine.createSpyObj('newShippingAddress', ['getKey'])
@@ -52,7 +71,18 @@ define(['squire', 'ko', 'jquery', 'jquery/validate'], function (Squire, ko, $) {
                 'checkoutData',
                 ['setSelectedShippingAddress', 'setNewCustomerShippingAddress', 'setSelectedShippingRate']
             ),
-            'uiRegistry': jasmine.createSpy(),
+            'Magento_Ui/js/lib/registry/registry': {
+                async: jasmine.createSpy().and.returnValue(function () {}),
+                create: jasmine.createSpy(),
+                set: jasmine.createSpy(),
+                get: jasmine.createSpy().and.callFake(function (query) {
+                    if (query === 'test.shippingAddress.shipping-address-fieldset.country_id') {
+                        return country;
+                    } else if (query === 'checkout.errors') {
+                        return {};
+                    }
+                })
+            },
             'Magento_Checkout/js/model/shipping-rate-service': jasmine.createSpy()
         },
         obj;
@@ -64,6 +94,7 @@ define(['squire', 'ko', 'jquery', 'jquery/validate'], function (Squire, ko, $) {
                 provider: 'provName',
                 name: '',
                 index: '',
+                parentName: 'test',
                 popUpForm: {
                     options: {
                         buttons: {
@@ -156,6 +187,7 @@ define(['squire', 'ko', 'jquery', 'jquery/validate'], function (Squire, ko, $) {
 
         describe('"setShippingInformation" method', function () {
             it('Check method call.', function () {
+                spyOn(obj, 'validateShippingInformation').and.returnValue(false);
                 expect(obj.setShippingInformation()).toBeUndefined();
             });
         });

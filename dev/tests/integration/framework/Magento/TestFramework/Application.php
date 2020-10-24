@@ -498,6 +498,7 @@ class Application
         $this->_ensureDirExists($this->_initParams[$dirs][DirectoryList::VAR_DIR][DirectoryList::PATH]);
 
         $this->copyAppConfigFiles();
+        $this->copyGlobalConfigFile();
 
         $installParams = $this->getInstallCliParams();
 
@@ -556,6 +557,17 @@ class Application
                 copy($file, $targetFile);
             }
         }
+    }
+
+    /**
+     * Copies global configuration file from the tests folder (see TESTS_GLOBAL_CONFIG_FILE)
+     *
+     * @return void
+     */
+    private function copyGlobalConfigFile()
+    {
+        $targetFile = $this->_configDir . '/config.local.php';
+        copy($this->globalConfigFile, $targetFile);
     }
 
     /**
@@ -692,6 +704,7 @@ class Application
         $customDirs = [
             DirectoryList::CONFIG => [$path => "{$this->installDir}/etc"],
             DirectoryList::VAR_DIR => [$path => $var],
+            DirectoryList::VAR_EXPORT => [$path => "{$var}/export"],
             DirectoryList::MEDIA => [$path => "{$this->installDir}/pub/media"],
             DirectoryList::STATIC_VIEW => [$path => "{$this->installDir}/pub/static"],
             DirectoryList::TMP_MATERIALIZATION_DIR => [$path => "{$var}/view_preprocessed/pub/static"],

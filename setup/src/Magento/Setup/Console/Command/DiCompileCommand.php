@@ -103,7 +103,7 @@ class DiCompileCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function configure()
     {
@@ -132,7 +132,7 @@ class DiCompileCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -260,9 +260,12 @@ class DiCompileCommand extends Command
      */
     private function getExcludedLibraryPaths(array $libraryPaths)
     {
-        $libraryPaths = array_map(function ($libraryPath) {
-            return preg_quote($libraryPath, '#');
-        }, $libraryPaths);
+        $libraryPaths = array_map(
+            function ($libraryPath) {
+                return preg_quote($libraryPath, '#');
+            },
+            $libraryPaths
+        );
 
         $excludedLibraryPaths = [
             '#^(?:' . join('|', $libraryPaths) . ')/([\\w]+/)?Test#',
@@ -307,8 +310,8 @@ class DiCompileCommand extends Command
     {
         $this->objectManager->configure(
             [
-                'preferences' => [\Magento\Setup\Module\Di\Compiler\Config\WriterInterface::class =>
-                    \Magento\Setup\Module\Di\Compiler\Config\Writer\Filesystem::class,
+                'preferences' => [\Magento\Framework\App\ObjectManager\ConfigWriterInterface::class =>
+                    \Magento\Framework\App\ObjectManager\ConfigWriter\Filesystem::class,
                 ], \Magento\Setup\Module\Di\Compiler\Config\ModificationChain::class => [
                     'arguments' => [
                         'modificationsList' => [
@@ -395,7 +398,8 @@ class DiCompileCommand extends Command
                 $compiledPathsList['application'],
                 $compiledPathsList['library'],
                 $compiledPathsList['generated_helpers'],
-            ]
+            ],
+            OperationFactory::APPLICATION_ACTION_LIST_GENERATOR => [],
         ];
 
         return $operations;
